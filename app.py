@@ -43,7 +43,12 @@ st.title("⚡ AI EV Charging Station Predictor")
 st.markdown("---")
 
 # API Key Logic
-api_key = st.secrets.get("GROQ_API_KEY") or os.environ.get("GROQ_API_KEY")
+api_key = os.environ.get("GROQ_API_KEY")
+if not api_key:
+    try:
+        api_key = st.secrets.get("GROQ_API_KEY")
+    except Exception:
+        api_key = None
 
 if not api_key:
     st.error("🔑 **Groq API Key not found.**")
