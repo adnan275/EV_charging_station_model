@@ -38,9 +38,407 @@ from langchain_core.tools import tool
 # Set Page Config
 st.set_page_config(page_title="EV Charging AI Agent", page_icon="⚡", layout="wide")
 
-# UI Header
-st.title("⚡ AI EV Charging Station Predictor")
-st.markdown("---")
+# ── UI ───────────────────────────────────────────────────────────────────────
+st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ─── Nuclear background override ───────────────────────────── */
+html { background: #000 !important; }
+body { background: #000 !important; }
+.stApp { background: #000 !important; }
+#root { background: #000 !important; }
+[data-testid="stAppViewContainer"] { background: #000 !important; }
+[data-testid="stApp"] { background: #000 !important; }
+[data-testid="stMain"] { background: #000 !important; }
+[data-testid="stHeader"] { background: #000 !important; }
+[data-testid="stBottom"] { background: #000 !important; }
+[data-testid="stMainBlockContainer"] { background: #000 !important; }
+.main { background: #000 !important; }
+.main .block-container { background: #000 !important; }
+section[tabindex="0"] { background: #000 !important; }
+.stChatFloatingInputContainer { background: #000 !important; }
+[class*="appview-container"] { background: #000 !important; }
+[class*="main"] { background: #000 !important; }
+
+/* ─── Hard reset ─────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+/* ─── Kill every blue/slate Streamlit background ────────────── */
+html,
+body,
+.stApp,
+[data-testid="stApp"],
+[data-testid="stAppViewContainer"],
+[data-testid="stHeader"],
+[data-testid="stMain"],
+[data-testid="stMainBlockContainer"],
+[data-testid="block-container"],
+section[data-testid="stMain"] > div,
+.main .block-container {
+    background: #000 !important;
+    background-color: #000 !important;
+}
+
+/* ─── Hide chrome ────────────────────────────────────────────── */
+#MainMenu, footer, header { visibility: hidden !important; }
+[data-testid="stToolbar"],
+[data-testid="stDecoration"],
+[data-testid="stStatusWidget"] { display: none !important; }
+
+/* ─── Font & colour base ─────────────────────────────────────── */
+body, .stApp {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    color: #e8e8e8 !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #1f1f1f; border-radius: 99px; }
+
+/* ─── Main column layout ─────────────────────────────────────── */
+[data-testid="stMainBlockContainer"],
+.main .block-container {
+    padding: 0 !important;
+    max-width: 100% !important;
+}
+[data-testid="stVerticalBlock"] {
+    gap: 0 !important;
+}
+
+/* ─── Inner content width ────────────────────────────────────── */
+.ev-wrap {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+/* ─── Fade-up animation ──────────────────────────────────────── */
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Header ─────────────────────────────────────────────────── */
+.ev-header {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 4rem 2rem 2.5rem;
+    border-bottom: 1px solid #141414;
+    margin-bottom: 0;
+    animation: fadeUp 0.5s cubic-bezier(.16,1,.3,1) both;
+}
+.ev-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.62rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #2c2c2c;
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 1.5rem;
+}
+.ev-label-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: #1e1e1e;
+    display: inline-block;
+    flex-shrink: 0;
+}
+.ev-header h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #f2f2f2;
+    line-height: 1.06;
+    letter-spacing: -0.05em;
+    margin: 0 0 1.1rem 0;
+}
+.ev-header h1 em {
+    font-style: italic;
+    font-weight: 300;
+    color: #505050;
+}
+.ev-header p {
+    font-size: 0.82rem;
+    color: #383838;
+    font-weight: 400;
+    line-height: 1.8;
+    max-width: 420px;
+    letter-spacing: 0.01em;
+}
+
+/* ─── Sidebar ────────────────────────────────────────────────── */
+[data-testid="stSidebar"],
+[data-testid="stSidebar"] > div,
+[data-testid="stSidebar"] > div > div,
+[data-testid="stSidebarContent"],
+[data-testid="stSidebarUserContent"],
+section[data-testid="stSidebar"],
+section[data-testid="stSidebar"] > div {
+    background: #050505 !important;
+    background-color: #050505 !important;
+}
+[data-testid="stSidebar"] {
+    border-right: 1px solid #111 !important;
+    width: 260px !important;
+}
+[data-testid="stSidebar"] > div:first-child {
+    padding: 2.5rem 1.4rem 2rem !important;
+}
+
+.sb-brand {
+    margin-bottom: 2rem;
+    padding-bottom: 1.75rem;
+    border-bottom: 1px solid #111;
+}
+.sb-brand .sb-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #b0b0b0;
+    letter-spacing: -0.015em;
+    margin-bottom: 0.25rem;
+}
+.sb-brand .sb-meta {
+    font-size: 0.6rem;
+    color: #202020;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.05em;
+}
+
+.sb-table { width: 100%; border-collapse: collapse; }
+.sb-table tr { border-bottom: 1px solid #0e0e0e; }
+.sb-table tr:last-child { border-bottom: none; }
+.sb-table td { padding: 0.6rem 0; vertical-align: middle; }
+.sb-table .k {
+    font-size: 0.58rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #222;
+    font-family: 'JetBrains Mono', monospace;
+}
+.sb-table .v {
+    font-size: 0.68rem;
+    color: #424242;
+    font-family: 'JetBrains Mono', monospace;
+    text-align: right;
+}
+
+.sb-divider { height: 1px; background: #111; margin: 1.5rem 0; }
+
+.sb-footer {
+    font-size: 0.58rem;
+    color: #1c1c1c;
+    font-family: 'JetBrains Mono', monospace;
+    margin-top: 0.75rem;
+    letter-spacing: 0.06em;
+}
+
+/* ─── Clear button ───────────────────────────────────────────── */
+[data-testid="stButton"] > button {
+    background: transparent !important;
+    border: 1px solid #1a1a1a !important;
+    color: #333 !important;
+    border-radius: 6px !important;
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 400 !important;
+    font-size: 0.75rem !important;
+    padding: 0.5rem 0.85rem !important;
+    transition: border-color 0.15s, color 0.15s !important;
+    width: 100% !important;
+    letter-spacing: 0.01em !important;
+    text-align: left !important;
+}
+[data-testid="stButton"] > button:hover {
+    border-color: #282828 !important;
+    color: #666 !important;
+    background: transparent !important;
+}
+
+/* ─── Chat area wrapper ──────────────────────────────────────── */
+[data-testid="stChatMessageContainer"],
+.stChatFloatingInputContainer {
+    max-width: 780px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* ─── Chat messages ──────────────────────────────────────────── */
+[data-testid="stChatMessage"] {
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 1px solid #0e0e0e !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    padding: 1.4rem 2rem !important;
+    max-width: 780px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    animation: fadeUp 0.25s ease both !important;
+}
+[data-testid="stChatMessage"]:hover {
+    background: #030303 !important;
+}
+/* user message — slightly brighter bg */
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
+    background: #040404 !important;
+}
+/* Avatar icons */
+[data-testid="chatAvatarIcon-user"] svg,
+[data-testid="chatAvatarIcon-assistant"] svg {
+    color: #282828 !important;
+}
+
+/* Message text */
+[data-testid="stChatMessage"] p {
+    font-size: 0.875rem !important;
+    line-height: 1.75 !important;
+    color: #999 !important;
+}
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) p {
+    color: #c8c8c8 !important;
+}
+
+/* ─── Chat input ─────────────────────────────────────────────── */
+[data-testid="stBottom"],
+[data-testid="stBottom"] > div,
+[data-testid="stBottom"] > div > div,
+.stChatFloatingInputContainer,
+.stChatFloatingInputContainer > div {
+    background: #000 !important;
+    background-color: #000 !important;
+    border-top: 1px solid #111 !important;
+    padding: 1rem 0 1.5rem !important;
+}
+/* Override the weird 3-column layout Streamlit puts inside stBottom */
+[data-testid="stBottom"] [data-testid="column"],
+[data-testid="stBottom"] .stColumn {
+    background: transparent !important;
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+}
+[data-testid="stChatInput"],
+[data-testid="stChatInput"] > div,
+[data-testid="stChatInputContainer"],
+div[class*="chatInput"] {
+    background: #0c0c0c !important;
+    background-color: #0c0c0c !important;
+    border: 1px solid #1e1e1e !important;
+    border-radius: 8px !important;
+    transition: border-color 0.15s !important;
+}
+[data-testid="stChatInput"]:focus-within,
+[data-testid="stChatInputContainer"]:focus-within {
+    border-color: #2a2a2a !important;
+    background: #0d0d0d !important;
+}
+[data-testid="stChatInput"] textarea,
+[data-testid="stChatInputContainer"] textarea {
+    background: transparent !important;
+    background-color: transparent !important;
+    color: #c8c8c8 !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.85rem !important;
+    caret-color: #666 !important;
+    line-height: 1.6 !important;
+}
+[data-testid="stChatInput"] textarea::placeholder,
+[data-testid="stChatInputContainer"] textarea::placeholder {
+    color: #282828 !important;
+}
+[data-testid="stChatInput"] button,
+[data-testid="stChatInputContainer"] button {
+    color: #2e2e2e !important;
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+/* ─── Markdown inside messages ───────────────────────────────── */
+.stMarkdown p, .stMarkdown li {
+    color: #686868 !important;
+    line-height: 1.8 !important;
+    font-size: 0.875rem !important;
+}
+.stMarkdown h1,.stMarkdown h2,.stMarkdown h3,.stMarkdown h4 {
+    color: #c0c0c0 !important;
+    font-weight: 600 !important;
+    letter-spacing: -0.02em !important;
+    margin-top: 1rem !important;
+    margin-bottom: 0.4rem !important;
+}
+.stMarkdown code {
+    background: #0e0e0e !important;
+    border: 1px solid #1e1e1e !important;
+    border-radius: 4px !important;
+    color: #585858 !important;
+    padding: 0.1em 0.4em !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 0.78em !important;
+}
+.stMarkdown pre {
+    background: #080808 !important;
+    border: 1px solid #161616 !important;
+    border-radius: 8px !important;
+    padding: 1rem !important;
+}
+.stMarkdown pre code {
+    background: transparent !important;
+    border: none !important;
+    color: #606060 !important;
+}
+.stMarkdown strong { color: #b8b8b8 !important; }
+.stMarkdown a { color: #444 !important; text-underline-offset: 3px; }
+.stMarkdown hr { border-color: #111 !important; margin: 1rem 0 !important; }
+
+/* ─── Alerts ─────────────────────────────────────────────────── */
+[data-testid="stAlert"] > div,
+[data-testid="stInfo"] > div {
+    background: #080808 !important;
+    border: 1px solid #1a1a1a !important;
+    border-left: 2px solid #222 !important;
+    border-radius: 6px !important;
+    color: #505050 !important;
+    font-size: 0.82rem !important;
+}
+[data-testid="stWarning"] > div {
+    background: #080808 !important;
+    border: 1px solid #1c1a10 !important;
+    border-left: 2px solid #282510 !important;
+    border-radius: 6px !important;
+    color: #585040 !important;
+}
+[data-testid="stError"] > div {
+    background: #080808 !important;
+    border: 1px solid #1c1010 !important;
+    border-left: 2px solid #281818 !important;
+    border-radius: 6px !important;
+    color: #584040 !important;
+}
+
+/* ─── Spinner ────────────────────────────────────────────────── */
+[data-testid="stSpinner"] p { color: #333 !important; font-size: 0.8rem !important; }
+
+/* ─── Sidebar markdown ───────────────────────────────────────── */
+[data-testid="stSidebar"] .stMarkdown p {
+    color: #1e1e1e !important;
+    font-size: 0.72rem !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# ── Header ────────────────────────────────────────────────────────────────────
+st.markdown("""
+<div class="ev-header">
+    <div class="ev-label"><span class="ev-label-dot"></span>EV Charging &nbsp;/&nbsp; AI Agent</div>
+    <h1>Ask anything about<br><em>electric vehicles.</em></h1>
+    <p>Predict Fast DC station availability or get answers on connectors, networks, and battery technology.</p>
+</div>
+""", unsafe_allow_html=True)
+
 
 # API Key Logic
 api_key = os.environ.get("GROQ_API_KEY")
@@ -360,15 +758,24 @@ if "messages" not in st.session_state:
 
 # Render Sidebar Manager
 with st.sidebar:
-    st.header("⚡ EV Agent Manager")
-    st.markdown("**Model:** `llama-3.3-70b-versatile`")
-    st.markdown("**LLM Provider:** Groq")
-    st.markdown("---")
-    if st.button("🗑️ Clear Conversation"):
+    st.markdown("""
+    <div class="sb-brand">
+        <div class="sb-title">EV Agent</div>
+        <div class="sb-meta">v2.0 &nbsp;&middot;&nbsp; RAG + Ensemble ML</div>
+    </div>
+    <table class="sb-table">
+        <tr><td class="k">Model</td><td class="v">llama-3.3-70b</td></tr>
+        <tr><td class="k">Provider</td><td class="v">Groq</td></tr>
+        <tr><td class="k">Embeddings</td><td class="v">MiniLM-L6-v2</td></tr>
+        <tr><td class="k">Ensemble</td><td class="v">RF + XGBoost</td></tr>
+    </table>
+    <div class="sb-divider"></div>
+    """, unsafe_allow_html=True)
+    if st.button("Clear conversation"):
         st.session_state.messages = [st.session_state.messages[0]]
         st.rerun()
-    st.info("Rate Limiter: 1 request per 5 seconds.")
-
+    st.markdown("""<div class="sb-footer">rate limit &nbsp;&middot;&nbsp; 1 req / 5s</div>""",
+                unsafe_allow_html=True)
 # Main Chat Interface History View
 for msg in st.session_state.messages:
     if isinstance(msg, SystemMessage):
